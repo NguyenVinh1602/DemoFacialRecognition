@@ -50,12 +50,12 @@ class App():
         button_frame = tk.Frame(commands_frame, bg=COLOR_COMPONENT, width=700)
         button_frame.pack(fill=tk.BOTH, expand=True, padx=180)
 
-        self.button_start_session = tk.Button(button_frame, text="Start Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.start_session)
-        self.button_capture_image = tk.Button(button_frame, text="Capture Image", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.capture_image)
-        self.button_end_session = tk.Button(button_frame, text="End Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.end_session)
-        self.button_upload_analyze = tk.Button(button_frame, text="Upload and Analyze", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat")
-        self.button_chose_image = tk.Button(button_frame, text="Choose Image", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat")
-        self.button_exit = tk.Button(button_frame, text="Exit", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.on_closing)
+        self.button_start_session = tk.Button(button_frame, text="Start Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.start_session, width= 20)
+        self.button_capture_image = tk.Button(button_frame, text="Capture Image", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.capture_image, width= 20)
+        self.button_end_session = tk.Button(button_frame, text="End Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.end_session, width= 20)
+        self.button_upload_analyze = tk.Button(button_frame, text="Upload and Analyze", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", width = 20)
+        self.button_chose_image = tk.Button(button_frame, text="Choose Image", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", width = 20)
+        self.button_exit = tk.Button(button_frame, text="Exit", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.on_closing, width= 20)
 
         self.button_start_session.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         self.button_capture_image.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
