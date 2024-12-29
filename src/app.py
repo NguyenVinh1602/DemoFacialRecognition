@@ -3,7 +3,6 @@ from var import *
 from PIL import Image, ImageTk
 import cv2
 import os
-import handle as hd
 
 
 class App():
@@ -13,6 +12,8 @@ class App():
 
         # Initialize saved images list
         self.saved_images = []
+        # List to store image ids and their paths
+        self.image_objects = []  
 
         # Title
         window.title("Project Name")
@@ -70,18 +71,25 @@ class App():
 
         # Create the canvas for images
         self.photo_canvas = tk.Canvas(self.photo_frame, bg=COLOR_COMPONENT)
+        self.photo_canvas.image_refs = []
         self.photo_canvas.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
 
         # Create the scrollbar
         self.scrollbar = tk.Scrollbar(self.photo_frame, orient="vertical", command=self.photo_canvas.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill="y")
+        self.photo_canvas.configure(yscrollcommand=self.scrollbar.set)
 
-        # Link the scrollbar with the canvas
-        self.photo_canvas.config(yscrollcommand=self.scrollbar.set)
+        # Create a frame inside canvas
+        self.scrollable_frame = tk.Frame(self.photo_canvas, bg=COLOR_COMPONENT)
+        self.photo_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+
+        # Bind <Configure> to update scrollregion
+        self.scrollable_frame.bind("<Configure>", lambda e: self.photo_canvas.configure(scrollregion=self.photo_canvas.bbox("all")))
 
         self.photo_label = tk.Label(self.photo_frame, text="", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
-        self.photo_label.pack(expand=True, side=tk.LEFT)
+        self.photo_label.pack(expand=True)
         self.photo_label.bind("<Button-1>", self.set_camera_image) 
+
 
         # Footer frame
         footer_frame = tk.Frame(window, bg=COLOR_BACKGROUND)
@@ -89,19 +97,19 @@ class App():
 
         # Result frame
         result_frame = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
-        result_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nsew")
+        result_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
         result_label = tk.Label(result_frame, text="Result", font=(TEXT_FONT, 16, "bold"), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
         result_label.pack(anchor="w")
 
-        result_text = tk.Text(result_frame, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=108, height= 6)
+        result_text = tk.Text(result_frame, height=4, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=108)
         result_text.insert("1.0", "Họ và tên: Dinh Viet Hoang\nGiới tính: Nam\nÁo: Đen")
         result_text.configure(state="disabled")
-        result_text.pack(fill=tk.X)
+        result_text.pack(fill=tk.X, pady=5)
 
         # Session frame now
-        session_frame_now = tk.Frame(footer_frame, bg=COLOR_COMPONENT, height= 2)
-        session_frame_now.grid(row=1, column=0, padx=10 ,sticky="new")
+        session_frame_now = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
+        session_frame_now.grid(row=1, column=0, padx=10, sticky="nsew")
 
         current_session_label = tk.Label(session_frame_now, text="Current session:", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
         current_session_label.pack(anchor="w")
@@ -109,8 +117,8 @@ class App():
         selected_session_label.pack(anchor="w")
 
         # Session frame last
-        session_frame_last = tk.Frame(footer_frame, bg=COLOR_COMPONENT, width=700, height=190, relief="solid", borderwidth=2)
-        session_frame_last.grid(row=0, column=1, rowspan=2, padx=10, pady=5, sticky="nsew")
+        session_frame_last = tk.Frame(footer_frame, bg=COLOR_COMPONENT, width=700, height=190)
+        session_frame_last.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="nsew")
         session_frame_last.pack_propagate(False)
 
         # Initialize Camera
@@ -136,7 +144,7 @@ class App():
             if self.cap is not None:
                 self.cap.release()  # Release the camera
                 self.cap = None
-            self.camera_label.config(image="", text="Camera is not connected", bg=COLOR_NOT_USER, fg="white")
+            self.camera_label.config(image="", text="Camera is not connected", bg="black", fg="white")
 
     def capture_image(self):
         if self.camera_active:
@@ -153,32 +161,15 @@ class App():
                 self.saved_images.append(image_path)  # Lưu đường dẫn ảnh vào danh sách
                 self.update_photo_canvas()  # Cập nhật hiển thị ảnh
     
-    # def update_photo_frame(self):
-    # # Xóa nội dung cũ trong Canvas
-    #     for widget in self.photo_canvas.winfo_children():
-    #         widget.destroy()
-
-    # # Tạo và hiển thị các ảnh từ danh sách
-    #     for idx, image_path in enumerate(self.saved_images):
-    #         image = Image.open(image_path)
-    #         image = image.resize((150, 100))  # Resize nhỏ hơn để hiển thị nhiều ảnh
-    #         photo_img = ImageTk.PhotoImage(image)
-
-    #         # Tạo một nhãn cho mỗi ảnh
-    #         image_label = tk.Label(self.photo_canvas, image=photo_img, bg=COLOR_COMPONENT)
-    #         image_label.photo = photo_img  # Lưu tham chiếu để tránh bị xóa
-    #         image_label.grid(row=idx // 4, column=idx % 4, padx=5, pady=5)  # Hiển thị theo lưới
-
     def update_photo_canvas(self):
         # Xóa toàn bộ nội dung cũ trên Canvas
         self.photo_canvas.delete("all")
-        
-        # Lưu tham chiếu ảnh trong danh sách
-        self.photo_canvas.image_refs = []  
+        self.image_objects.clear()  # Clear the image objects list
+        self.photo_canvas.image_refs.clear()
 
         for idx, image_path in enumerate(self.saved_images):
             # Load và resize ảnh
-            image = Image.open(image_path).resize((150, 100))
+            image = Image.open(image_path).resize((140, 100))
             photo_img = ImageTk.PhotoImage(image)
             
             # Lưu tham chiếu để tránh bị giải phóng bộ nhớ
@@ -189,9 +180,36 @@ class App():
             y = (idx // 4) * 110 + 10  # Cách nhau 110px theo chiều dọc
 
             # Vẽ ảnh lên Canvas
-            self.photo_canvas.create_image(x, y, image=photo_img, anchor="nw")
+            img_id = self.photo_canvas.create_image(x, y, image=photo_img, anchor="nw", tags="image")
+
+            # Save the ID and the path of the image in the image_objects list
+            self.image_objects.append((img_id, image_path))
+        # Cập nhật scrollregion
+        self.photo_canvas.configure(scrollregion=self.photo_canvas.bbox("all"))
+
+        # Bind click event on the canvas to handle image clicks
+        self.photo_canvas.tag_bind("image", "<Button-1>", self.on_image_click)
 
 
+    def on_image_click(self, event):
+        # Get the ID of the clicked object
+        clicked_item = self.photo_canvas.find_withtag("current")
+
+        # Check if we clicked an image
+        if clicked_item:
+            # Retrieve the image ID from the list using the clicked item
+            for img_id, image_path in self.image_objects:
+                if img_id == clicked_item[0]:
+                    self.end_session()
+                    # Open and display the clicked image
+                    image = Image.open(image_path).resize((self.video_width, self.video_height))
+                    photo_img = ImageTk.PhotoImage(image)
+
+                    # Display the image in the camera label
+                    self.camera_label.imgtk = photo_img  # Maintain reference to avoid garbage collection
+                    self.camera_label.config(image=photo_img, text="")  # Set the image and clear the text
+                    return
+                
     def update_video_feed(self):
         if self.camera_active and self.cap is not None:
             ret, frame = self.cap.read()
@@ -221,11 +239,21 @@ class App():
         self.window.destroy()
 
     def set_camera_image(self, event):
-        # Check if photo_label has an image
-        if hasattr(self.photo_label, "photo") and self.photo_label.photo is not None:
-            self.camera_active = False
-            self.camera_label.config(image=self.photo_label.photo)  # Set the camera label to show the image clicked
-            self.camera_label.imgtk = self.photo_label.photo  # Maintain a reference to the image object
-            self.camera_label.config(text="")  # Clear the text
-        else:
-            self.start_session()  # If no image, restart the camera session to show the feed
+    # Get the coordinates of the mouse click
+        x, y = self.photo_canvas.canvasx(event.x), self.photo_canvas.canvasy(event.y)
+        
+        # Identify which image was clicked
+        for idx, image_path in enumerate(self.saved_images):
+            img_x = (idx % 4) * 160 + 10
+            img_y = (idx // 4) * 110 + 10
+            img_width, img_height = 140, 100
+
+            # Check if the click is within the bounds of an image
+            if img_x <= x <= img_x + img_width and img_y <= y <= img_y + img_height:
+                # Load and display the clicked image in the camera label
+                image = Image.open(image_path).resize((self.video_width, self.video_height))
+                photo_img = ImageTk.PhotoImage(image)
+                
+                self.camera_label.imgtk = photo_img  # Maintain reference to avoid garbage collection
+                self.camera_label.config(image=photo_img, text="")  # Set the image and clear the text
+                return
