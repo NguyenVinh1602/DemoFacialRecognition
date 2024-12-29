@@ -24,7 +24,7 @@ class App():
         header_frame = tk.Frame(window, bg=COLOR_COMPONENT, height=70)
         header_frame.pack(fill=tk.X)
 
-        header_label = tk.Label(header_frame, text="PROJECT NAME", font=(TEXT_FONT, 24, "bold"), fg=COLOR_HEADER, bg=COLOR_COMPONENT)
+        header_label = tk.Label(header_frame, text="PROJECT NAME", font=(TEXT_FONT, 24, "bold"), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
         header_label.pack()
 
         # MAIN FRAME
@@ -32,41 +32,39 @@ class App():
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Camera frame
-        self.camera_frame = tk.Frame(main_frame, bg=COLOR_NOT_USER, width=760, height=300, relief="solid", borderwidth=2)
-        self.camera_frame.grid(row=0, column=0, rowspan=2, padx=10, pady=10, sticky="nsew")
+        self.camera_frame = tk.Frame(main_frame, bg=COLOR_DISABLED, width=810, height=240, relief="solid", borderwidth=2)
+        self.camera_frame.grid(row=0, column=0, rowspan=2, padx=10, pady=(10,0), sticky="nsew")
         self.camera_frame.pack_propagate(False)
         
-        self.camera_label = tk.Label(self.camera_frame, text="Camera is not connected", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_NOT_USER)
+        self.camera_label = tk.Label(self.camera_frame, text="Camera is not connected", font=(TEXT_FONT, 12), fg= COLOR_TEXT_DISABLED, bg=COLOR_DISABLED)
         self.camera_label.pack(expand=True)
 
         # Commands frame
         commands_frame = tk.Frame(main_frame, bg=COLOR_COMPONENT)
-        commands_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        commands_frame.grid(row=0, column=1, padx=10, pady=(10, 0) ,sticky="new")
 
         commands_title_label = tk.Label(commands_frame, text="Session Commands", font=(TEXT_FONT, 18, "bold"), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
         commands_title_label.pack()
 
         # Button frame
-        button_frame = tk.Frame(commands_frame, bg=COLOR_COMPONENT, width=700)
+        button_frame = tk.Frame(commands_frame, bg=COLOR_COMPONENT, width=650)
         button_frame.pack(fill=tk.BOTH, expand=True, padx=180)
 
-        self.button_start_session = tk.Button(button_frame, text="Start Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.start_session, width= 20)
-        self.button_capture_image = tk.Button(button_frame, text="Capture Image", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.capture_image, width= 20)
-        self.button_end_session = tk.Button(button_frame, text="End Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.end_session, width= 20)
-        self.button_upload_analyze = tk.Button(button_frame, text="Upload and Analyze", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", width = 20)
-        self.button_chose_image = tk.Button(button_frame, text="Choose Image", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", width = 20)
-        self.button_exit = tk.Button(button_frame, text="Exit", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.on_closing, width= 20)
+        self.button_start_session = tk.Button(button_frame, text="Start Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_TEXT, relief="flat", command=self.start_session, width= 20)
+        self.button_capture_image = tk.Button(button_frame, text="Capture Image", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_TEXT, relief="flat", command=self.capture_image, width= 20)
+        self.button_end_session = tk.Button(button_frame, text="End Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_TEXT, relief="flat", command=self.end_session, width= 20)
+        self.button_upload_analyze = tk.Button(button_frame, text="Upload and Analyze", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_TEXT, relief="flat", width = 20)
+        self.button_exit = tk.Button(button_frame, text="Exit", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_TEXT, relief="flat", command=self.on_closing, width= 20)
 
-        self.button_start_session.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-        self.button_capture_image.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
-        self.button_end_session.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
-        self.button_upload_analyze.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
-        self.button_chose_image.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
-        self.button_exit.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
+        self.button_start_session.pack(fill= tk.X, pady= 5 )
+        self.button_capture_image.pack(fill= tk.X, pady= 5 )
+        self.button_end_session.pack(fill= tk.X, pady= 5 )
+        self.button_upload_analyze.pack(fill= tk.X, pady= 5 )
+        self.button_exit.pack(fill= tk.X, pady= 5 )
 
         # Photo frame with scrollbar
-        self.photo_frame = tk.Frame(main_frame, bg=COLOR_COMPONENT, width=700, height=300)
-        self.photo_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        self.photo_frame = tk.Frame(main_frame, bg=COLOR_COMPONENT, width=650, height=260)
+        self.photo_frame.grid(row=1, column=1, padx=10, pady=(10,0), sticky="nsew")
         self.photo_frame.pack_propagate(False)
 
         # Create the canvas for images
@@ -97,19 +95,19 @@ class App():
 
         # Result frame
         result_frame = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
-        result_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        result_frame.grid(row=0, column=0, padx=10, pady=(0,10), sticky="nsew")
 
         result_label = tk.Label(result_frame, text="Result", font=(TEXT_FONT, 16, "bold"), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
-        result_label.pack(anchor="w")
+        result_label.pack(anchor="w", padx=10, pady= 5)
 
-        result_text = tk.Text(result_frame, height=4, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=108)
+        result_text = tk.Text(result_frame, height=5, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=115)
         result_text.insert("1.0", "Họ và tên: Dinh Viet Hoang\nGiới tính: Nam\nÁo: Đen")
         result_text.configure(state="disabled")
-        result_text.pack(fill=tk.X, pady=5)
+        result_text.pack()
 
         # Session frame now
         session_frame_now = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
-        session_frame_now.grid(row=1, column=0, padx=10, sticky="nsew")
+        session_frame_now.grid(row=1, column=0, padx=10, sticky="new")
 
         current_session_label = tk.Label(session_frame_now, text="Current session:", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
         current_session_label.pack(anchor="w")
@@ -117,15 +115,15 @@ class App():
         selected_session_label.pack(anchor="w")
 
         # Session frame last
-        session_frame_last = tk.Frame(footer_frame, bg=COLOR_COMPONENT, width=700, height=190)
-        session_frame_last.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="nsew")
+        session_frame_last = tk.Frame(footer_frame, bg=COLOR_COMPONENT, width=650, height=180)
+        session_frame_last.grid(row=0, column=1, rowspan=2, padx=10, sticky="new")
         session_frame_last.pack_propagate(False)
 
         # Initialize Camera
         self.cap = None
         self.camera_active = False
-        self.video_width = 640
-        self.video_height = 480
+        self.video_width = 810
+        self.video_height = 500
 
     def start_session(self):
         if not self.camera_active:
@@ -144,7 +142,7 @@ class App():
             if self.cap is not None:
                 self.cap.release()  # Release the camera
                 self.cap = None
-            self.camera_label.config(image="", text="Camera is not connected", bg="black", fg="white")
+            self.camera_label.config(image="", text="Camera is not connected", bg=COLOR_DISABLED, fg=COLOR_TEXT_DISABLED)
 
     def capture_image(self):
         if self.camera_active:
