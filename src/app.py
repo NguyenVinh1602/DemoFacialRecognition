@@ -3,6 +3,7 @@ from var import *
 from PIL import Image, ImageTk
 import cv2
 import os
+import handle as hd
 
 
 class App():
@@ -45,7 +46,7 @@ class App():
         commands_title_label.pack()
 
         # Button frame
-        button_frame = tk.Frame(commands_frame, bg=COLOR_COMPONENT, width=500)
+        button_frame = tk.Frame(commands_frame, bg=COLOR_COMPONENT, width=700)
         button_frame.pack(fill=tk.BOTH, expand=True, padx=180)
 
         self.button_start_session = tk.Button(button_frame, text="Start Session", font=(TEXT_FONT, 10), bg=COLOR_BUTTON, fg=COLOR_COMPONENT, relief="flat", command=self.start_session)
@@ -63,7 +64,7 @@ class App():
         self.button_exit.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
         # Photo frame with scrollbar
-        self.photo_frame = tk.Frame(main_frame, bg=COLOR_COMPONENT, width=600, height=300)
+        self.photo_frame = tk.Frame(main_frame, bg=COLOR_COMPONENT, width=700, height=300)
         self.photo_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
         self.photo_frame.pack_propagate(False)
 
@@ -79,9 +80,8 @@ class App():
         self.photo_canvas.config(yscrollcommand=self.scrollbar.set)
 
         self.photo_label = tk.Label(self.photo_frame, text="", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
-        self.photo_label.pack(expand=True)
+        self.photo_label.pack(expand=True, side=tk.LEFT)
         self.photo_label.bind("<Button-1>", self.set_camera_image) 
-
 
         # Footer frame
         footer_frame = tk.Frame(window, bg=COLOR_BACKGROUND)
@@ -89,19 +89,19 @@ class App():
 
         # Result frame
         result_frame = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
-        result_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        result_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nsew")
 
         result_label = tk.Label(result_frame, text="Result", font=(TEXT_FONT, 16, "bold"), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
         result_label.pack(anchor="w")
 
-        result_text = tk.Text(result_frame, height=4, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=108)
+        result_text = tk.Text(result_frame, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=108, height= 6)
         result_text.insert("1.0", "Họ và tên: Dinh Viet Hoang\nGiới tính: Nam\nÁo: Đen")
         result_text.configure(state="disabled")
-        result_text.pack(fill=tk.X, pady=5)
+        result_text.pack(fill=tk.X)
 
         # Session frame now
-        session_frame_now = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
-        session_frame_now.grid(row=1, column=0, padx=10, sticky="nsew")
+        session_frame_now = tk.Frame(footer_frame, bg=COLOR_COMPONENT, height= 2)
+        session_frame_now.grid(row=1, column=0, padx=10 ,sticky="new")
 
         current_session_label = tk.Label(session_frame_now, text="Current session:", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
         current_session_label.pack(anchor="w")
@@ -109,8 +109,8 @@ class App():
         selected_session_label.pack(anchor="w")
 
         # Session frame last
-        session_frame_last = tk.Frame(footer_frame, bg=COLOR_COMPONENT, width=622, height=190)
-        session_frame_last.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="nsew")
+        session_frame_last = tk.Frame(footer_frame, bg=COLOR_COMPONENT, width=700, height=190, relief="solid", borderwidth=2)
+        session_frame_last.grid(row=0, column=1, rowspan=2, padx=10, pady=5, sticky="nsew")
         session_frame_last.pack_propagate(False)
 
         # Initialize Camera
@@ -136,7 +136,7 @@ class App():
             if self.cap is not None:
                 self.cap.release()  # Release the camera
                 self.cap = None
-            self.camera_label.config(image="", text="Camera is not connected", bg="black", fg="white")
+            self.camera_label.config(image="", text="Camera is not connected", bg=COLOR_NOT_USER, fg="white")
 
     def capture_image(self):
         if self.camera_active:
