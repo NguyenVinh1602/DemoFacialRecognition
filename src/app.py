@@ -1,4 +1,5 @@
 import tkinter as tk
+import uuid
 from var import * 
 from PIL import Image, ImageTk
 import cv2
@@ -14,6 +15,13 @@ class App():
         self.saved_images = []
         # List to store image ids and their paths
         self.image_objects = []  
+
+        self.session_dir = None
+        self.image_count = 0
+        self.session_id = 0 # selected sessions_id
+        self.current_session = 0 # current session - start a new session
+        self.session_ls = self.reload_session()  # list of all sessions
+        self.image_labels = []  # To hold image labels for gallery display
 
         # Title
         window.title("Project Name")
@@ -62,6 +70,10 @@ class App():
         self.button_upload_analyze.pack(fill= tk.X, pady= 5 )
         self.button_exit.pack(fill= tk.X, pady= 5 )
 
+        self.button_capture_image.config(state = tk.DISABLED)
+        self.button_upload_analyze.config(state = tk.DISABLED)
+        self.button_end_session.config(state = tk.DISABLED)
+
         # Photo frame with scrollbar
         self.photo_frame = tk.Frame(main_frame, bg=COLOR_COMPONENT, width=650, height=260)
         self.photo_frame.grid(row=1, column=1, padx=10, pady=(10,0), sticky="nsew")
@@ -97,22 +109,29 @@ class App():
         result_frame = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
         result_frame.grid(row=0, column=0, padx=10, pady=(0,10), sticky="nsew")
 
-        result_label = tk.Label(result_frame, text="Result", font=(TEXT_FONT, 16, "bold"), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
-        result_label.pack(anchor="w", padx=10, pady= 5)
+        result_title = tk.Label(result_frame, text="Result", font=(TEXT_FONT, 16, "bold"), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
+        result_title.pack(anchor="w", padx=10, pady= 5)
 
-        result_text = tk.Text(result_frame, height=5, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=115)
-        result_text.insert("1.0", "Họ và tên: Dinh Viet Hoang\nGiới tính: Nam\nÁo: Đen")
-        result_text.configure(state="disabled")
-        result_text.pack()
+        self.result_labels = {}
+        # actions = [
+        #     ("Get ID", self.get_id),
+        #     ("Get Cloth Color", self.get_cloth_color),
+        #     ("Get Tie", self.get_tie),
+        #     ("Get Glasses", self.get_glasses),
+        #     ("Get Name Tag", self.get_name_tag),        
+        # ]
+
+        result_label = tk.Label(result_frame, height=5, bg=COLOR_COMPONENT, fg=COLOR_TEXT, font=(TEXT_FONT, 10), relief="flat", width=100)
+        result_label.pack()
 
         # Session frame now
         session_frame_now = tk.Frame(footer_frame, bg=COLOR_COMPONENT)
         session_frame_now.grid(row=1, column=0, padx=10, sticky="new")
 
-        current_session_label = tk.Label(session_frame_now, text="Current session:", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
-        current_session_label.pack(anchor="w")
-        selected_session_label = tk.Label(session_frame_now, text="Selected session:", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
-        selected_session_label.pack(anchor="w")
+        self.current_session_label = tk.Label(session_frame_now, text="Current session: None", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
+        self.current_session_label.pack(anchor="w")
+        self.selected_session_label = tk.Label(session_frame_now, text="Selected session: None", font=(TEXT_FONT, 12), fg=COLOR_TEXT, bg=COLOR_COMPONENT)
+        self.selected_session_label.pack(anchor="w")
 
         # Session frame last
         session_frame_last = tk.Frame(footer_frame, bg=COLOR_COMPONENT, width=650, height=180)
@@ -126,6 +145,8 @@ class App():
         self.video_height = 500
 
     def start_session(self):
+        self.session_id =uuid.uuid4()
+        self.button_start_session.config(state=tk.DISABLED)
         if not self.camera_active:
             self.camera_active = True
             if self.cap is None:
@@ -133,16 +154,28 @@ class App():
             if self.cap.isOpened():
                 self.camera_label.config(text="")  # Clear text
                 self.update_video_feed()
+                self.current_session_label.config(text=f"Current session: {self.session_id}")
+                self.image_count = 0
+                self.button_end_session.config(state=tk.NORMAL)
+                self.button_capture_image.config(state=tk.NORMAL)
+                self.button_upload_analyze.config(state=tk.NORMAL)
             else:
                 self.camera_label.config(text="Camera is not available")
 
-    def end_session(self):
+    def off_cam(self):
+        self.button_start_session.config(state=tk.NORMAL)
+        self.button_end_session.config(state=tk.DISABLED)
         if self.camera_active:
             self.camera_active = False
             if self.cap is not None:
                 self.cap.release()  # Release the camera
                 self.cap = None
             self.camera_label.config(image="", text="Camera is not connected", bg=COLOR_DISABLED, fg=COLOR_TEXT_DISABLED)
+
+    def end_session(self):
+        self.button_capture_image.config(state=tk.DISABLED)
+        self.button_upload_analyze.config(state=tk.DISABLED)
+        self.off_cam()
 
     def capture_image(self):
         if self.camera_active:
@@ -198,7 +231,7 @@ class App():
             # Retrieve the image ID from the list using the clicked item
             for img_id, image_path in self.image_objects:
                 if img_id == clicked_item[0]:
-                    self.end_session()
+                    self.off_cam()
                     # Open and display the clicked image
                     image = Image.open(image_path).resize((self.video_width, self.video_height))
                     photo_img = ImageTk.PhotoImage(image)
@@ -255,3 +288,17 @@ class App():
                 self.camera_label.imgtk = photo_img  # Maintain reference to avoid garbage collection
                 self.camera_label.config(image=photo_img, text="")  # Set the image and clear the text
                 return
+    def reload_session(self):
+        #read all old folder from clients --> session_id
+        # base_img_dir = Path("gallery")
+        # Get a list of all folder names in the directory
+        # return [folder.name for folder in base_img_dir.iterdir() if folder.is_dir()]
+        return 
+
+def create_main_window():
+    window = tk.Tk()
+    app = App(window)
+    window.mainloop()
+
+if __name__ == "__main__":
+    create_main_window()
